@@ -49,18 +49,6 @@ function checkAnsible(){
     fi
 }
 
-############################################
-###
-###     TEST
-###
-############################################
-
-#echo "${PROJECT_VLAN}" >> ${TENANT_LOG}
-#echo "${PROJECT_DESCRIPTION}"  >> ${TENANT_LOG}
-#echo "${PROJECT_EXT_SEGMENT_NUM}"  >> ${TENANT_LOG}
-#echo "${PROJECT_EXT_IP_24BIT}"  >> ${TENANT_LOG}
-#echo "${PROJECT_MANAGE_IP_24BIT}"  >> ${TENANT_LOG}
-
 function create_openstack_tenant(){
     checkAnsible
     keystone
