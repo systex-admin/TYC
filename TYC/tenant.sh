@@ -117,7 +117,6 @@ function router(){
     sleep 1
     openstack router add subnet ${PROJECT_VLAN}_external-router ${PROJECT_VLAN}_tenant-external-sub
     sleep 1
-
     openstack router create ${PROJECT_VLAN}_manage-router
     sleep 1
     openstack router set ${PROJECT_VLAN}_manage-router --external-gateway ${PROJECT_VLAN}_manage
@@ -127,10 +126,7 @@ function router(){
 }
 
 function keypair(){
-    #KEY_NAME="tyc-${PROJECT_VLAN}-admin"
-
-    # TEST
-    KEY_NAME="tyc-test-admin"
+    KEY_NAME="tyc-${PROJECT_VLAN}-admin"
     openstack keypair create --private-key ${KEY_NAME}.pem ${KEY_NAME}
     sleep 1
     chown -R heat-admin.heat-admin ${DIR}/*.pem
