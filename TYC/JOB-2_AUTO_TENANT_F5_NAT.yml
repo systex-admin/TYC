@@ -1,0 +1,57 @@
+- name: "STEP 1 - CONNECT TO F5"
+  hosts: "{{ F5_HOST }}"
+  tasks:
+    - name: "PING"
+      ping:
+      register: message
+    - name: "RESULT"
+      debug:
+        msg: "{{ message }}"
+- name: "STEP 2 - DEPLOY TO F5"
+  become: yes
+  become_user: root
+  become_method: sudo
+  hosts: "{{ F5_HOST }}"
+  tasks:
+    - name: READ CSV FILE
+      read_csv:
+        path: "{{ F5_PATH }}/{{ CSV_FILE }}"
+        fieldnames: "{{ FIELD_NAME1 }},{{ FIELD_NAME2 }},{{ FIELD_NAME3 }},{{ FIELD_NAME4 }},{{ FIELD_NAME5 }}"
+        skipinitialspace: yes
+        delimiter: ","
+      register: csvfile
+    - name: SAVING JSON DATA TO FILE
+      copy:
+        content:  "{{ csvfile.list }}"
+        dest: "{{ F5_PATH }}/{{ NAT_LIST_JSON_FILE }}"
+- name: "STEP 3 - DEPLOY TO F5"
+  hosts: "{{ F5_HOST }}"
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: "DEPLOY RESOURCE"
+      copy:
+        src: "{{ ANSIBLE_PATH }}/{{ item }}"
+        dest: "{{ F5_PATH }}/"
+        mode: '0755'
+        follow: yes
+      with_items:
+        - "{{ AUTO_GET_TENANT_SCRIPT }}"
+        - "{{ AUTO_NAT_SCRIPT }}"
+        - "{{ NAT_PYTHON }}"
+- name: "STEP 4 - UPDATE TO F5"
+  hosts: "{{ F5_HOST }}"
+  tasks:
+    - name: "RUN SCRIPT - GET TENANT LOG"
+      command: "sh ./{{ AUTO_GET_TENANT_SCRIPT }} {{ ANSIBLE_HOST }} {{ ANSIBLE_PATH }} {{ TENANT_LOG }} {{ F5_PATH }}"
+      args:
+        chdir: "{{ F5_PATH }}/"
+    - name: "RUN SCRIPT - AUTO ADD NAT"
+      command: "sh ./{{ AUTO_NAT_SCRIPT }} {{ NAT_PYTHON }} {{ NAT_LIST_JSON_FILE }} {{ TENANT_LOG }} {{ DNAT_STR_POOL }} {{ DNAT_END_POOL }} {{ SNAT_STR_POOL }} {{ SNAT_END_POOL }}"
+      args:
+        chdir: "{{ F5_PATH }}/"
+      register: nat_script
+    - name: "RESULT"
+      debug:
+        msg: "{{ nat_script.stdout_lines }}"

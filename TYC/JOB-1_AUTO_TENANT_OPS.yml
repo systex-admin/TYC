@@ -1,0 +1,39 @@
+- name: "STEP 1 - CONNECT TO OPENSTACK"
+  hosts: "{{ CONTROLLER0_HOST }}"
+  tasks:
+    - name: "PING"
+      ping:
+      register: message
+    - name: "RESULT"
+      debug:
+        msg: "{{ message }}"
+- name: "STEP 2 - CREATE OPENSTACK TENANT"
+  hosts: "{{ CONTROLLER0_HOST }}"
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: "DEPLOY RESOURCE"
+      copy:
+        src: "{{ CREATE_OSP_TENANT_SCRIPT }}"
+        dest: "{{ OSP_PATH }}/{{ CREATE_OSP_TENANT_SCRIPT }}"
+        mode: '0755'
+        follow: yes
+    - name: "RUN SCRIPT"
+      command: "sh ./{{ CREATE_OSP_TENANT_SCRIPT }} {{ TENANT_LOG }} {{ PROJECT_VLAN }} {{ PROJECT_DESCRIPTION }} {{ PROJECT_EXT_SEGMENT_NUM }} {{ PROJECT_EXT_IP_24BIT }} {{ PROJECT_MANAGE_IP_24BIT }} {{ PROJECT_USER_PASS }}"
+      args:
+        chdir: "{{ OSP_PATH }}/"
+      register: result
+    - name: "RESULT"
+      debug:
+        msg: "{{ result.stdout_lines }}"
+    - name: "FETCH RESOURCE"
+      fetch:
+        src: "{{ OSP_PATH }}/{{ TENANT_LOG }}"
+        dest: "{{ ANSIBLE_PATH }}/"
+        flat: yes
+    - name: "REMOVE RESOURCE"
+      file:
+        path: "{{ OSP_PATH }}/{{ CREATE_OSP_TENANT_SCRIPT }}"
+        state: absent
+
