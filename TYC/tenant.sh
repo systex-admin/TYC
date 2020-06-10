@@ -144,6 +144,13 @@ function checkTenant(){
 }
 
 function set_tenant_log(){
+    if [ -f ${DIR}/${TENANT_LOG} ]; then
+        #TENANT_COUNT=`wc -l ${DIR}/${TENANT_LOG}`
+        #if [ ${TENANT_COUNT} -qe 30 ];then
+        sudo rm -f ${DIR}/${TENANT_LOG}
+        #fi
+    fi
+
     echo "VLAN: ${PROJECT_EXT_SEGMENT_NUM}" >> ${TENANT_LOG}
     echo "EXT_POOL: ${PROJECT_EXT_IP_24BIT}" >> ${TENANT_LOG}
     echo "MANAGE_POOL: ${PROJECT_MANAGE_IP_24BIT}" >> ${TENANT_LOG}
@@ -152,4 +159,3 @@ function set_tenant_log(){
 }
 
 create_openstack_tenant
-
